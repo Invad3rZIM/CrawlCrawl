@@ -2,7 +2,10 @@
 Golang Demo BFS Concurrent Webcrawler
 
 ## To Build
-go build
+go build!
+
+[buildSequence](https://user-images.githubusercontent.com/8118229/137076378-8fc095b7-c6f3-4bbf-98db-c9883fe6c900.png)
+
 
 ## To Run (With Sample Output)
 
