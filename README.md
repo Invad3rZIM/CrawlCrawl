@@ -30,5 +30,7 @@ Also...
 1. Enter in main()
 2. Set initial params (startingURL / maxConcurrentWorkers / maxBufferSize)
 
+## Sample Output
+
 ![programOutput](https://user-images.githubusercontent.com/8118229/137066075-d2e8def1-0fb0-4ef6-b7b8-21a06142881e.png)
 ![testOutput](https://user-images.githubusercontent.com/8118229/137066074-9d1e1525-441d-4206-8cae-b81649bbdeff.png)
