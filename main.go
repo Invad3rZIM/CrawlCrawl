@@ -10,10 +10,6 @@ import (
 func main() {
 	fmt.Println("Crawl Crawl by Kirk Zimmer")
 
-	/// -------Process-------
-	/// 1. take in input url
-	///	2. parse it, add to list of visited
-
 	visitedURLCache := map[string]struct{}{}    //visited url tracking
 	concurrencySafetyLock := make(chan bool, 1) //without this, there is synchrony between a map read / write, and crashes program
 
