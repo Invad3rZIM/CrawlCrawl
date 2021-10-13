@@ -6,7 +6,13 @@ go build
 
 ## To Run
 
-./CrawlCrawl
+./CrawlCrawl (runs with http://www.rescale.com as static default)
+
+![programOutput](https://user-images.githubusercontent.com/8118229/137066075-d2e8def1-0fb0-4ef6-b7b8-21a06142881e.png)
+
+./CrawlCrawl --url=https://startingurl.com
+
+![commandlineInput](https://user-images.githubusercontent.com/8118229/137076048-37c6c44e-ab68-486e-ae17-a666b8aca594.png)
 
 ## To Test (May Require Go 1.17)
 
@@ -14,6 +20,7 @@ go version (to confirm version type)
 
 go test -v
 
+![testOutput](https://user-images.githubusercontent.com/8118229/137066074-9d1e1525-441d-4206-8cae-b81649bbdeff.png)
 
 ## Program Purpose
 
@@ -35,5 +42,4 @@ Also...
 
 ## Sample Output
 
-![programOutput](https://user-images.githubusercontent.com/8118229/137066075-d2e8def1-0fb0-4ef6-b7b8-21a06142881e.png)
-![testOutput](https://user-images.githubusercontent.com/8118229/137066074-9d1e1525-441d-4206-8cae-b81649bbdeff.png)
+
