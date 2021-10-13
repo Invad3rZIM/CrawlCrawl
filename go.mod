@@ -1,4 +1,4 @@
-module CrawlCrawl-
+module CrawlCrawl
 
 go 1.17
 

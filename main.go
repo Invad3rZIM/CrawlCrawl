@@ -18,7 +18,7 @@ func main() {
 	concurrencySafetyLock := make(chan bool, 1) //without this, there is synchrony between a map read / write, and crashes program
 
 	startingURL := "http://www.rescale.com"
-	maxConcurrentWorkers := 2
+	maxConcurrentWorkers := 5
 	maxURLBufferSize := 1000
 
 	webscrapeQueue := make(chan string, maxURLBufferSize)
@@ -114,8 +114,8 @@ func parseBodyForURLs(body string) []string {
 		if endIndex > 0 {
 			parsedURL := subBody[0:endIndex]
 
-			matchesSearchRequirement := strings.HasPrefix(parsedURL, "http:") || strings.HasPrefix(parsedURL, "https:") //final safety check on core requiremenet
-			hasURLDisqualifier := strings.Contains(parsedURL, " ") || !strings.Contains(parsedURL, "\n")                //no line spaces or line breaks... simple protection
+			matchesSearchRequirement := strings.HasPrefix(parsedURL, "http:") || strings.HasPrefix(parsedURL, "https:") && strings.Contains(parsedURL, ".") //final safety check on core requiremenet... also it seems that all urls have at least 1 '.' symbol
+			hasURLDisqualifier := strings.Contains(parsedURL, " ") || strings.Contains(parsedURL, "\n")                                                     //no line spaces or line breaks... simple protection
 
 			if matchesSearchRequirement && !hasURLDisqualifier {
 				results = append(results, parsedURL)
