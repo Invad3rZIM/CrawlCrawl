@@ -99,6 +99,22 @@ func parseBodyForURLs(body string) []string {
 	subBody := body + "" //no mutation
 
 	for currentIteration < maxIterationAllowed && len(subBody) > 0 {
+
+		//start with a tags.
+		startIndex_aTag := strings.Index(subBody, "<a")
+		if startIndex_aTag == -1 {
+			break
+		}
+		subBody = subBody[startIndex_aTag:]
+
+		//find the closest href
+		startIndex_href := strings.Index(subBody, "href")
+		if startIndex_href == -1 {
+			break
+		}
+		subBody = subBody[startIndex_href:]
+
+		//find the closest starting token after the href
 		startIndex_http := strings.Index(subBody, "http:") // ':' appears to be needed to handle stuff like http-equiv="X-UA-Compatibl....
 		startIndex_https := strings.Index(subBody, "https:")
 		startIndex_guardedLowest := minPositiveInt(startIndex_http, startIndex_https)
@@ -106,10 +122,11 @@ func parseBodyForURLs(body string) []string {
 			break //true exit condition - nothing is found
 		}
 
-		subBody = subBody[startIndex_guardedLowest-1:] //go -1 element to get the encapsulation character ie ' / "
-		endIndex_toSearch := subBody[0:1]
+		//find the appropriate ending token
+		subBody = subBody[startIndex_guardedLowest-1:] //		go -1 element to get the encapsulation character ie ' / "
+		endToken_toSearch := subBody[0:1]
 		subBody = subBody[1:]                                 //move head up by 1 element
-		endIndex := strings.Index(subBody, endIndex_toSearch) //search for the matching index
+		endIndex := strings.Index(subBody, endToken_toSearch) //search for the matching index
 
 		if endIndex > 0 {
 			parsedURL := subBody[0:endIndex]
