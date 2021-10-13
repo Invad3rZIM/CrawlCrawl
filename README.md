@@ -4,7 +4,7 @@ Golang Demo BFS Concurrent Webcrawler
 ## To Build
 go build
 
-## To Run
+## To Run (With Sample Output)
 
 ./CrawlCrawl (runs with http://www.rescale.com as static default)
 
@@ -39,7 +39,4 @@ Also...
 1. Enter in main()
 2. Set initial params (startingURL / maxConcurrentWorkers / maxBufferSize)
 3. processURL does the meat of the program - getRequest() -> log -> parseBodyForUrls() -> log children -> add new children urls to the queue -> rinse & repeat
-
-## Sample Output
-
 
