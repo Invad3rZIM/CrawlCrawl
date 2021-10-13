@@ -1,5 +1,5 @@
 # CrawlCrawl by Kirk Zimmer
-Golang Demo BFS Concurrent Webcrawler
+Golang Demo Concurrent Webcrawler
 
 ## To Build
 go build
