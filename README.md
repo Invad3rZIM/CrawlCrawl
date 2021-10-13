@@ -9,7 +9,9 @@ go build
 ./CrawlCrawl
 
 ## To Test (May Require Go 1.17)
+
 go version (to confirm version type)
+
 go test -v
 
 
@@ -29,3 +31,9 @@ Also...
 
 1. Enter in main()
 2. Set initial params (startingURL / maxConcurrentWorkers / maxBufferSize)
+3. processURL does the meat of the program - getRequest() -> log -> parseBodyForUrls() -> log children -> add new children urls to the queue -> rinse & repeat
+
+## Sample Output
+
+![programOutput](https://user-images.githubusercontent.com/8118229/137066075-d2e8def1-0fb0-4ef6-b7b8-21a06142881e.png)
+![testOutput](https://user-images.githubusercontent.com/8118229/137066074-9d1e1525-441d-4206-8cae-b81649bbdeff.png)
