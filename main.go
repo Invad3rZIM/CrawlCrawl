@@ -10,9 +10,9 @@ import (
 func main() {
 	fmt.Println("Crawl Crawl by Kirk Zimmer")
 
-	/// 			-------Process-------
-	/// 			1. take in input url
-	///				2. parse it, add to list of visited
+	/// -------Process-------
+	/// 1. take in input url
+	///	2. parse it, add to list of visited
 
 	visitedURLCache := map[string]struct{}{}    //visited url tracking
 	concurrencySafetyLock := make(chan bool, 1) //without this, there is synchrony between a map read / write, and crashes program
@@ -39,7 +39,7 @@ func main() {
 	select {} //nonblocking infinite loop.
 }
 
-///iterate through
+///processURL handles a single scrape request, protecting the cache via a lock channel to avoid concurrent read/write crashing
 func processURL(webscrapeQueue chan (string), visitedURLCache map[string]struct{}, safetyLock chan (bool)) {
 	url := <-webscrapeQueue
 
