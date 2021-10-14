@@ -9,14 +9,14 @@ import (
 	"time"
 )
 
-var inputURL = flag.String("url", "https://legal.twitter.com/imprint ", "input url")
+var inputURL = flag.String("url", "https://legal.twitter.com/imprint", "input url")
 
 func main() {
 	flag.Parse() //required to read user input from command line
 
 	fmt.Println("Crawl Crawl by Kirk Zimmer")
 
-	visitedURLCache := map[string]struct{}{}    //visited url tracking
+	visitedURLCache := map[string]bool{}        //visited url tracking
 	concurrencySafetyLock := make(chan bool, 1) //without this, there isn't synchrony between a map read / write, and crashes program
 
 	maxConcurrentWorkers := 5
@@ -37,7 +37,6 @@ func main() {
 	for i := 0; i < maxConcurrentWorkers; i = i + 1 {
 		callback := func(i int) {
 			for {
-
 				url := <-webscraperQueue
 				workersStatus[i] = 1
 				processURL(url, webscraperQueue, visitedURLCache, concurrencySafetyLock)
@@ -70,7 +69,7 @@ func main() {
 }
 
 ///processURL handles a single scrape request, protecting the cache via a lock channel to avoid concurrent read/write crashing
-func processURL(url string, webscraperQueue chan (string), visitedURLCache map[string]struct{}, concurrencySafetyLock chan (bool)) {
+func processURL(url string, webscraperQueue chan (string), visitedURLCache map[string]bool, concurrencySafetyLock chan (bool)) {
 	verbosity := 0
 
 	if verbosity > 0 {
@@ -78,13 +77,14 @@ func processURL(url string, webscraperQueue chan (string), visitedURLCache map[s
 	}
 
 	concurrencySafetyLock <- true
-	if _, found := visitedURLCache[url]; found {
+	if visitedURLCache[url] == true {
 		<-concurrencySafetyLock
 		return
 	}
-	visitedURLCache[url] = struct{}{} //cache result upon visiting
 	<-concurrencySafetyLock
-	fmt.Print("\n" + url) //output url
+
+	fmt.Print("\n" + url)       //output url
+	visitedURLCache[url] = true //cache result upon visiting
 
 	output, err := getRequest(url)
 
@@ -97,10 +97,12 @@ func processURL(url string, webscraperQueue chan (string), visitedURLCache map[s
 
 		for _, childURL := range results {
 			concurrencySafetyLock <- true
-			if _, found := visitedURLCache[childURL]; !found {
+
+			// fmt.Println(visitedURLCache, " XXX")
+			if visitedURLCache[childURL] == false {
 				<-concurrencySafetyLock
 				webscraperQueue <- childURL
-				fmt.Print("\n\t", childURL) //output children
+				fmt.Print("\n\t" + childURL) //output children
 			} else {
 				<-concurrencySafetyLock
 			}
@@ -126,6 +128,8 @@ func parseBodyForURLs(body string) []string {
 	maxIterationAllowed := 99999999 //guard against something relatively close to infinity...
 
 	verbosity := 0 //1 for debug
+
+	uniqueResults := map[string]struct{}{}
 	results := []string{}
 
 	subBody := body + "" //no mutation
@@ -177,7 +181,8 @@ func parseBodyForURLs(body string) []string {
 			hasURLDisqualifier := strings.Contains(parsedURL, " ") || strings.Contains(parsedURL, "\n")                                                     //no line spaces or line breaks... simple protection
 
 			if matchesSearchRequirement && !hasURLDisqualifier {
-				results = append(results, parsedURL)
+				trimmedURL := strings.Trim(parsedURL, " ")
+				uniqueResults[trimmedURL] = struct{}{}
 			} else {
 				if verbosity > 0 {
 					fmt.Println("Discarding result : ", parsedURL, " after checks : on matchesSearchRequirement, hasURLDisqualifier ( ", matchesSearchRequirement, hasURLDisqualifier, " ) should ideally be ( true, false )")
@@ -204,6 +209,10 @@ func parseBodyForURLs(body string) []string {
 			fmt.Println("Parse loop exited after processing entire body")
 		}
 		fmt.Println("Parse loop exited after iteration count : ", currentIteration)
+	}
+
+	for key, _ := range uniqueResults {
+		results = append(results, key)
 	}
 
 	return results
