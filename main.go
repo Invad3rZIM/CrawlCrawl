@@ -17,7 +17,7 @@ func main() {
 	fmt.Println("Crawl Crawl by Kirk Zimmer")
 
 	visitedURLCache := map[string]struct{}{}    //visited url tracking
-	concurrencySafetyLock := make(chan bool, 1) //without this, there is synchrony between a map read / write, and crashes program
+	concurrencySafetyLock := make(chan bool, 1) //without this, there isn't synchrony between a map read / write, and crashes program
 
 	maxConcurrentWorkers := 5
 	maxURLBufferSize := 999999
