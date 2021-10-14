@@ -6,41 +6,76 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 )
 
-var inputURL = flag.String("url", "http://www.rescale.com", "input url")
-
-func init() {
-	flag.Parse() //required to read user input from command line
-}
+var inputURL = flag.String("url", "https://legal.twitter.com/imprint ", "input url")
 
 func main() {
+	flag.Parse() //required to read user input from command line
+
 	fmt.Println("Crawl Crawl by Kirk Zimmer")
 
 	visitedURLCache := map[string]struct{}{}    //visited url tracking
 	concurrencySafetyLock := make(chan bool, 1) //without this, there is synchrony between a map read / write, and crashes program
 
 	maxConcurrentWorkers := 5
-	maxURLBufferSize := 1000
+	maxURLBufferSize := 999999
 
 	webscraperQueue := make(chan string, maxURLBufferSize)
 	webscraperQueue <- *inputURL
 
+	//okay...revise this slightly to handle task knowledge better...
+
+	workersStatus := []int{}
+
+	exitSignal := make(chan bool, 1)
+
 	for i := 0; i < maxConcurrentWorkers; i = i + 1 {
-		callback := func() {
+		workersStatus = append(workersStatus, 0)
+	}
+	for i := 0; i < maxConcurrentWorkers; i = i + 1 {
+		callback := func(i int) {
 			for {
+
 				url := <-webscraperQueue
+				workersStatus[i] = 1
 				processURL(url, webscraperQueue, visitedURLCache, concurrencySafetyLock)
+
+				allVacant := false
+
+				for j := 0; j < len(workersStatus); j = j + 1 {
+					if 1 == workersStatus[j] && j != i {
+						allVacant = true
+					}
+				}
+				workersStatus[i] = 0
+
+				time.Sleep(time.Second)
+
+				if allVacant == true && len(webscraperQueue) == 0 {
+					exitSignal <- true
+				}
 			}
 		}
-		go callback()
+		go callback(i)
 	}
-
-	select {} //nonblocking infinite loop.
+	for {
+		<-exitSignal
+		fmt.Println("exiting")
+		if len(webscraperQueue) == 0 {
+			return
+		}
+	}
 }
 
 ///processURL handles a single scrape request, protecting the cache via a lock channel to avoid concurrent read/write crashing
 func processURL(url string, webscraperQueue chan (string), visitedURLCache map[string]struct{}, concurrencySafetyLock chan (bool)) {
+	verbosity := 0
+
+	if verbosity > 0 {
+		fmt.Println("Q size", len(webscraperQueue))
+	}
 
 	concurrencySafetyLock <- true
 	if _, found := visitedURLCache[url]; found {
@@ -49,10 +84,8 @@ func processURL(url string, webscraperQueue chan (string), visitedURLCache map[s
 	}
 	visitedURLCache[url] = struct{}{} //cache result upon visiting
 	<-concurrencySafetyLock
-
 	fmt.Print("\n" + url) //output url
 
-	verbosity := 0 //1 for debug
 	output, err := getRequest(url)
 
 	if err != nil {
